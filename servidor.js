@@ -1,25 +1,25 @@
 // servidor.js
 const express = require("express");
 const mongoose = require("mongoose");
-const configuracion = require("./config/config");
+const configuracion = require("./src/config/config");
 
 // Importar funciones de juegos
 const {
   obtenerJuegoPorId,
   obtenerTodosLosJuegos,
-} = require("./funciones/juegos/GET");
-const { crearJuego } = require("./funciones/juegos/POST");
-const { actualizarJuego } = require("./funciones/juegos/PUT");
-const { eliminarJuego } = require("./funciones/juegos/DELETE");
+} = require("./funciones/juegos/get");
+const { crearJuego } = require("./funciones/juegos/post");
+const { actualizarJuego } = require("./funciones/juegos/put");
+const { eliminarJuego } = require("./funciones/juegos/delete");
 
 // Importar funciones de resenias
 const {
   obtenerReseniasPorJuego,
   obtenerTodasLasResenias,
-} = require("./funciones/resenias/GET");
-const { crearResenia } = require("./funciones/resenias/POST");
-const { actualizarResenia } = require("./funciones/resenias/PUT");
-const { eliminarResenia } = require("./funciones/resenias/DELETE");
+} = require("./funciones/resenias/get");
+const { crearResenia } = require("./funciones/resenias/post");
+const { actualizarResenia } = require("./funciones/resenias/put");
+const { eliminarResenia } = require("./funciones/resenias/delete");
 
 const cors = require("cors");
 const aplicacion = express();
@@ -91,5 +91,5 @@ aplicacion.listen(configuracion.servidor.puerto, () => {
     `🎮 API de Videojuegos en http://localhost:${configuracion.servidor.puerto}`
   );
   console.log(`📝 Entorno: ${configuracion.servidor.entorno}`);
-  console.log(`🔗 CORS habilitado para: ${configuracion.cors.origen}`);
+  console.log(`🔗 CORS habilitado para: ${configuracion.cors.origin}`);
 });
