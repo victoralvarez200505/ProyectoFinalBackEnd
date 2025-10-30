@@ -1,4 +1,4 @@
-const Resenia = require("../../models/resenia");
+const Resenia = require("../../src/models/resenia");
 const { validarObjectId } = require("../../utils/validation");
 
 /**
@@ -29,8 +29,8 @@ const eliminarResenia = async (req, res, next) => {
         id: reseniaEliminada._id,
         comentario: reseniaEliminada.comentario,
         puntuacion: reseniaEliminada.puntuacion,
-        nombreUsuario: reseniaEliminada.nombreUsuario
-      }
+        nombreUsuario: reseniaEliminada.nombreUsuario,
+      },
     });
   } catch (error) {
     console.error("Error eliminando reseña:", error);

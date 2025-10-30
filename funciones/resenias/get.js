@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const Resenia = require("../../models/resenia");
+const Resenia = require("../../src/models/resenia");
 const {
   validarObjectId,
   sanitizarConsulta,
@@ -27,7 +27,7 @@ const obtenerTodasLasResenias = async (req, res) => {
     }
 
     // Ejecutar consulta
-    let query = Resenia.find(filtro).populate('juegoId', 'titulo');
+    let query = Resenia.find(filtro).populate("juegoId", "titulo");
 
     // Aplicar límite si existe
     if (limite) {
@@ -57,7 +57,10 @@ const obtenerReseniasPorJuego = async (req, res) => {
       return res.status(400).json({ error: "ID de juego no válido" });
     }
 
-    const resenias = await Resenia.find({ juegoId }).populate('juegoId', 'titulo');
+    const resenias = await Resenia.find({ juegoId }).populate(
+      "juegoId",
+      "titulo"
+    );
 
     res.json(resenias);
   } catch (error) {

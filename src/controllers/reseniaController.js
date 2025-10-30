@@ -1,9 +1,9 @@
 /**
  * 📝 CONTROLADOR DE RESEÑAS
- * 
+ *
  * Este archivo contiene toda la lógica de negocio para manejar reseñas.
  * Procesa las solicitudes HTTP y maneja la interacción con la base de datos.
- * 
+ *
  * Funcionalidades:
  * - Obtener todas las reseñas
  * - Obtener reseñas de un juego específico
@@ -15,7 +15,10 @@
 
 const Resenia = require("../models/resenia");
 const Juego = require("../models/juego");
-const { transformarArrayReseniasAFrontend, transformarReseniaAFrontend } = require("../utils/transformer");
+const {
+  transformarArrayReseniasAFrontend,
+  transformarReseniaAFrontend,
+} = require("../utils/transformer");
 const { crearError } = require("../middleware/errorHandler");
 
 /**
@@ -28,12 +31,12 @@ const obtenerTodasLasResenias = async (req, res, next) => {
   try {
     console.log("🔍 Obteniendo todas las reseñas...");
 
-    const { 
+    const {
       limite,
       juegoId,
       calificacion,
-      ordenarPor = 'fechaCreacion',
-      orden = 'desc'
+      ordenarPor = "fechaCreacion",
+      orden = "desc",
     } = req.query;
 
     // Construir filtro
@@ -48,12 +51,12 @@ const obtenerTodasLasResenias = async (req, res, next) => {
     }
 
     // Construir consulta con populate para obtener datos del juego
-    let query = Resenia.find(filtro).populate('juegoId', 'nombre genero');
+    let query = Resenia.find(filtro).populate("juegoId", "nombre genero");
 
     // Aplicar ordenamiento
-    const ordenamientoValido = ['fechaCreacion', 'calificacion', 'autor'];
+    const ordenamientoValido = ["fechaCreacion", "calificacion", "autor"];
     if (ordenamientoValido.includes(ordenarPor)) {
-      const direccion = orden === 'asc' ? 1 : -1;
+      const direccion = orden === "asc" ? 1 : -1;
       query = query.sort({ [ordenarPor]: direccion });
     }
 
@@ -68,7 +71,6 @@ const obtenerTodasLasResenias = async (req, res, next) => {
     // Transformar al formato del frontend
     const reseniasFormateadas = transformarArrayReseniasAFrontend(resenias);
     res.json(reseniasFormateadas);
-
   } catch (error) {
     console.error("❌ Error obteniendo reseñas:", error);
     next(error);
@@ -93,14 +95,13 @@ const obtenerReseniasPorJuego = async (req, res, next) => {
     }
 
     const resenias = await Resenia.find({ juegoId })
-      .populate('juegoId', 'nombre')
+      .populate("juegoId", "nombre")
       .sort({ fechaCreacion: -1 });
 
     console.log(`✅ Encontradas ${resenias.length} reseñas para el juego`);
 
     const reseniasFormateadas = transformarArrayReseniasAFrontend(resenias);
     res.json(reseniasFormateadas);
-
   } catch (error) {
     console.error("❌ Error obteniendo reseñas por juego:", error);
     next(error);
@@ -118,7 +119,10 @@ const obtenerReseniaPorId = async (req, res, next) => {
     const { id } = req.params;
     console.log(`🔍 Buscando reseña con ID: ${id}`);
 
-    const reseniaEncontrada = await Resenia.findById(id).populate('juegoId', 'nombre genero');
+    const reseniaEncontrada = await Resenia.findById(id).populate(
+      "juegoId",
+      "nombre genero"
+    );
 
     if (!reseniaEncontrada) {
       console.log(`❌ Reseña no encontrada: ${id}`);
@@ -129,7 +133,6 @@ const obtenerReseniaPorId = async (req, res, next) => {
 
     const reseniaFormateada = transformarReseniaAFrontend(reseniaEncontrada);
     res.json(reseniaFormateada);
-
   } catch (error) {
     console.error("❌ Error obteniendo reseña por ID:", error);
     next(error);
@@ -143,9 +146,19 @@ const obtenerReseniaPorId = async (req, res, next) => {
  * @param {Function} next - Función next de Express
  */
 const crearResenia = async (req, res, next) => {
+  console.log("🚩 Handler crearResenia alcanzado");
   try {
-    const { juegoId, contenido, calificacion, autor } = req.body;
+    const {
+      juegoId,
+      contenido,
+      calificacion,
+      autor,
+      dificultad,
+      horasJugadas,
+      recomendaria,
+    } = req.body;
     console.log(`➕ Creando reseña para juego: ${juegoId}`);
+    console.log("📦 Body recibido:", req.body);
 
     // Verificar que el juego existe
     const juegoExiste = await Juego.findById(juegoId);
@@ -153,31 +166,43 @@ const crearResenia = async (req, res, next) => {
       return next(crearError("Juego no encontrado", 404));
     }
 
-    // Crear nueva reseña
+    // Crear nueva reseña (incluyendo dificultad, horasJugadas y recomendaria)
     const nuevaResenia = new Resenia({
       juegoId,
       contenido,
       calificacion,
-      autor: autor || 'Anónimo',
-      fechaCreacion: new Date()
+      autor: autor || "Anónimo",
+      dificultad,
+      horasJugadas,
+      recomendaria,
+      fechaCreacion: new Date(),
     });
 
     const reseniaGuardada = await nuevaResenia.save();
 
     // Obtener la reseña con datos del juego populados
-    const reseniaCompleta = await Resenia.findById(reseniaGuardada._id)
-      .populate('juegoId', 'nombre genero');
+    const reseniaCompleta = await Resenia.findById(
+      reseniaGuardada._id
+    ).populate("juegoId", "nombre genero");
 
     console.log(`✅ Reseña creada exitosamente`);
 
     const reseniaFormateada = transformarReseniaAFrontend(reseniaCompleta);
     res.status(201).json({
       mensaje: "Reseña creada exitosamente",
-      resenia: reseniaFormateada
+      resenia: reseniaFormateada,
     });
-
   } catch (error) {
-    console.error("❌ Error creando reseña:", error);
+    console.error("❌ Error creando reseña (stack):", error && error.stack);
+    if (error && error.errors) {
+      Object.values(error.errors).forEach((e) => {
+        console.error("❌ Error de validación:", e.message);
+      });
+    }
+    if (error && error.message) {
+      console.error("❌ Error mensaje:", error.message);
+    }
+    console.error("❌ Error creando reseña (obj):", error);
     next(error);
   }
 };
@@ -200,7 +225,10 @@ const actualizarResenia = async (req, res, next) => {
     }
 
     // Si se cambia el juegoId, verificar que el nuevo juego existe
-    if (req.body.juegoId && req.body.juegoId !== reseniaExistente.juegoId.toString()) {
+    if (
+      req.body.juegoId &&
+      req.body.juegoId !== reseniaExistente.juegoId.toString()
+    ) {
       const juegoExiste = await Juego.findById(req.body.juegoId);
       if (!juegoExiste) {
         return next(crearError("Juego no encontrado", 404));
@@ -212,16 +240,15 @@ const actualizarResenia = async (req, res, next) => {
       id,
       { ...req.body, fechaActualizacion: new Date() },
       { new: true, runValidators: true }
-    ).populate('juegoId', 'nombre genero');
+    ).populate("juegoId", "nombre genero");
 
     console.log(`✅ Reseña actualizada`);
 
     const reseniaFormateada = transformarReseniaAFrontend(reseniaActualizada);
     res.json({
       mensaje: "Reseña actualizada exitosamente",
-      resenia: reseniaFormateada
+      resenia: reseniaFormateada,
     });
-
   } catch (error) {
     console.error("❌ Error actualizando reseña:", error);
     next(error);
@@ -251,10 +278,9 @@ const eliminarResenia = async (req, res, next) => {
       mensaje: "Reseña eliminada exitosamente",
       resenia: {
         id: reseniaEliminada._id,
-        juegoId: reseniaEliminada.juegoId
-      }
+        juegoId: reseniaEliminada.juegoId,
+      },
     });
-
   } catch (error) {
     console.error("❌ Error eliminando reseña:", error);
     next(error);
@@ -273,27 +299,27 @@ const obtenerEstadisticasJuego = async (req, res, next) => {
     console.log(`📊 Obteniendo estadísticas de reseñas para juego: ${juegoId}`);
 
     const estadisticas = await Resenia.aggregate([
-      { $match: { juegoId: require('mongoose').Types.ObjectId(juegoId) } },
+      { $match: { juegoId: require("mongoose").Types.ObjectId(juegoId) } },
       {
         $group: {
           _id: null,
           totalResenias: { $sum: 1 },
           promedioCalificacion: { $avg: "$calificacion" },
           calificacionMaxima: { $max: "$calificacion" },
-          calificacionMinima: { $min: "$calificacion" }
-        }
-      }
+          calificacionMinima: { $min: "$calificacion" },
+        },
+      },
     ]);
 
     const distribucionCalificaciones = await Resenia.aggregate([
-      { $match: { juegoId: require('mongoose').Types.ObjectId(juegoId) } },
+      { $match: { juegoId: require("mongoose").Types.ObjectId(juegoId) } },
       {
         $group: {
           _id: "$calificacion",
-          cantidad: { $sum: 1 }
-        }
+          cantidad: { $sum: 1 },
+        },
       },
-      { $sort: { _id: 1 } }
+      { $sort: { _id: 1 } },
     ]);
 
     res.json({
@@ -301,11 +327,10 @@ const obtenerEstadisticasJuego = async (req, res, next) => {
         totalResenias: 0,
         promedioCalificacion: 0,
         calificacionMaxima: 0,
-        calificacionMinima: 0
+        calificacionMinima: 0,
       },
-      distribucion: distribucionCalificaciones
+      distribucion: distribucionCalificaciones,
     });
-
   } catch (error) {
     console.error("❌ Error obteniendo estadísticas:", error);
     next(error);
@@ -319,5 +344,5 @@ module.exports = {
   crearResenia,
   actualizarResenia,
   eliminarResenia,
-  obtenerEstadisticasJuego
+  obtenerEstadisticasJuego,
 };

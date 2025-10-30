@@ -3,23 +3,11 @@ const express = require("express");
 const mongoose = require("mongoose");
 const configuracion = require("./src/config/config");
 
-// Importar funciones de juegos
-const {
-  obtenerJuegoPorId,
-  obtenerTodosLosJuegos,
-} = require("./funciones/juegos/get");
-const { crearJuego } = require("./funciones/juegos/post");
-const { actualizarJuego } = require("./funciones/juegos/put");
-const { eliminarJuego } = require("./funciones/juegos/delete");
+// Importar router moderno de juegos
+const juegosRouter = require("./src/routes/juegos");
 
-// Importar funciones de resenias
-const {
-  obtenerReseniasPorJuego,
-  obtenerTodasLasResenias,
-} = require("./funciones/resenias/get");
-const { crearResenia } = require("./funciones/resenias/post");
-const { actualizarResenia } = require("./funciones/resenias/put");
-const { eliminarResenia } = require("./funciones/resenias/delete");
+// Importar router moderno de reseñas
+const reseniasRouter = require("./src/routes/resenias");
 
 const cors = require("cors");
 const aplicacion = express();
@@ -62,19 +50,11 @@ aplicacion.use((error, req, res, next) => {
   res.status(500).json({ error: "Error interno del servidor" });
 });
 
-// ==================== RUTAS PARA JUEGOS ====================
-aplicacion.get("/api/juegos/:id", obtenerJuegoPorId);
-aplicacion.get("/api/juegos", obtenerTodosLosJuegos);
-aplicacion.post("/api/juegos", crearJuego);
-aplicacion.put("/api/juegos/:id", actualizarJuego);
-aplicacion.delete("/api/juegos/:id", eliminarJuego);
+// ==================== RUTAS PARA JUEGOS (MODERNO) ====================
+aplicacion.use("/api/juegos", juegosRouter);
 
-// ==================== RUTAS PARA RESENIAS ====================
-aplicacion.get("/api/resenias", obtenerTodasLasResenias);
-aplicacion.get("/api/resenias/juego/:juegoId", obtenerReseniasPorJuego);
-aplicacion.post("/api/resenias", crearResenia);
-aplicacion.put("/api/resenias/:id", actualizarResenia);
-aplicacion.delete("/api/resenias/:id", eliminarResenia);
+// ==================== RUTAS PARA RESENIAS (MODERNO) ====================
+aplicacion.use("/api/resenias", reseniasRouter);
 
 // ==================== SALUD DEL SERVIDOR ====================
 aplicacion.get("/health", (req, res) => {

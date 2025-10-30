@@ -1,4 +1,4 @@
-const Juego = require("../../models/juego");
+const Juego = require("../../src/models/juego");
 const {
   transformarABackend,
   transformarAFrontend,
@@ -15,7 +15,7 @@ const crearJuego = async (req, res, next) => {
   try {
     // Debug: Ver qué datos llegan del frontend
     console.log("📥 Datos recibidos del frontend:", req.body);
-    
+
     // Transformar datos del frontend al formato del backend
     const datosBackend = transformarABackend(req.body);
     console.log("🔄 Datos transformados al backend:", datosBackend);

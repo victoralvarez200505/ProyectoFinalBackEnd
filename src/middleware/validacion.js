@@ -1,9 +1,9 @@
 /**
  * ✅ MIDDLEWARE DE VALIDACIÓN
- * 
+ *
  * Este archivo contiene middleware para validar datos de entrada
  * antes de que lleguen a los controladores.
- * 
+ *
  * Validaciones incluidas:
  * - Validación de IDs de MongoDB
  * - Validación de datos de juegos
@@ -46,28 +46,41 @@ const validarJuego = (req, res, next) => {
   const errores = [];
 
   // Campos requeridos
-  if (!nombre || typeof nombre !== 'string' || nombre.trim().length === 0) {
+  if (!nombre || typeof nombre !== "string" || nombre.trim().length === 0) {
     errores.push("Nombre es requerido y debe ser un texto válido");
   }
 
-  if (!año || !Number.isInteger(año) || año < 1970 || año > new Date().getFullYear() + 2) {
-    errores.push(`Año debe ser un número entero entre 1970 y ${new Date().getFullYear() + 2}`);
+  if (
+    !año ||
+    !Number.isInteger(año) ||
+    año < 1970 ||
+    año > new Date().getFullYear() + 2
+  ) {
+    errores.push(
+      `Año debe ser un número entero entre 1970 y ${
+        new Date().getFullYear() + 2
+      }`
+    );
   }
 
-  if (!genero || typeof genero !== 'string' || genero.trim().length === 0) {
+  if (!genero || typeof genero !== "string" || genero.trim().length === 0) {
     errores.push("Género es requerido");
   }
 
-  if (!plataforma || typeof plataforma !== 'string' || plataforma.trim().length === 0) {
+  if (
+    !plataforma ||
+    typeof plataforma !== "string" ||
+    plataforma.trim().length === 0
+  ) {
     errores.push("Plataforma es requerida");
   }
 
   // Campos opcionales con validación
-  if (imagen && typeof imagen !== 'string') {
+  if (imagen && typeof imagen !== "string") {
     errores.push("Imagen debe ser una URL válida");
   }
 
-  if (resena && typeof resena !== 'string') {
+  if (resena && typeof resena !== "string") {
     errores.push("Reseña debe ser texto válido");
   }
 
@@ -82,7 +95,9 @@ const validarJuego = (req, res, next) => {
 
   // Si hay errores, retornar error de validación
   if (errores.length > 0) {
-    return next(crearError(`Errores de validación: ${errores.join(", ")}`, 400));
+    return next(
+      crearError(`Errores de validación: ${errores.join(", ")}`, 400)
+    );
   }
 
   // Sanitizar datos
@@ -108,7 +123,11 @@ const validarResenia = (req, res, next) => {
   }
 
   // Validar contenido
-  if (!contenido || typeof contenido !== 'string' || contenido.trim().length === 0) {
+  if (
+    !contenido ||
+    typeof contenido !== "string" ||
+    contenido.trim().length === 0
+  ) {
     errores.push("Contenido de la reseña es requerido");
   } else if (contenido.length < 10) {
     errores.push("Contenido debe tener al menos 10 caracteres");
@@ -117,20 +136,57 @@ const validarResenia = (req, res, next) => {
   }
 
   // Validar calificación
-  if (calificacion === undefined || calificacion === null) {
+  const califNum = Number(calificacion);
+  if (calificacion === undefined || calificacion === null || isNaN(califNum)) {
     errores.push("Calificación es requerida");
-  } else if (!Number.isInteger(calificacion) || calificacion < 1 || calificacion > 5) {
+  } else if (!Number.isInteger(califNum) || califNum < 1 || califNum > 5) {
     errores.push("Calificación debe ser un número entero entre 1 y 5");
   }
 
   // Validar autor (opcional)
-  if (autor && (typeof autor !== 'string' || autor.length > 50)) {
+  if (autor && (typeof autor !== "string" || autor.length > 50)) {
     errores.push("Autor debe ser texto válido de máximo 50 caracteres");
   }
 
+  // Validar dificultad (opcional)
+  const { dificultad, horasJugadas, recomendaria } = req.body;
+  const dificultadesValidas = [
+    "Muy fácil",
+    "Fácil",
+    "Normal",
+    "Difícil",
+    "Muy difícil",
+  ];
+  if (dificultad && !dificultadesValidas.includes(dificultad)) {
+    errores.push("Dificultad no válida");
+  }
+
+  // Validar horasJugadas (opcional)
+  if (horasJugadas !== undefined && horasJugadas !== null) {
+    const horas = Number(horasJugadas);
+    if (isNaN(horas) || horas < 0 || horas > 10000) {
+      errores.push("Horas jugadas debe ser un número entre 0 y 10000");
+    }
+  }
+
+  // Validar recomendaria (opcional, robusto para string "true"/"false")
+  let recomendariaBool = recomendaria;
+  if (typeof recomendaria === "string") {
+    if (recomendaria.toLowerCase() === "true") recomendariaBool = true;
+    else if (recomendaria.toLowerCase() === "false") recomendariaBool = false;
+  }
+  if (recomendaria !== undefined && typeof recomendariaBool !== "boolean") {
+    errores.push("Recomendaria debe ser booleano");
+  }
+  // Actualizar el valor sanitizado para el resto del flujo
+  req.body.recomendaria = recomendariaBool;
+
   // Si hay errores, retornar error de validación
   if (errores.length > 0) {
-    return next(crearError(`Errores de validación: ${errores.join(", ")}`, 400));
+    console.log("🔴 Errores de validación:", errores);
+    return next(
+      crearError(`Errores de validación: ${errores.join(", ")}`, 400)
+    );
   }
 
   // Sanitizar datos
@@ -152,15 +208,18 @@ const sanitizarJuego = (datos) => {
   if (datos.plataforma) sanitizado.plataforma = datos.plataforma.trim();
   if (datos.imagen) sanitizado.imagen = datos.imagen.trim();
   if (datos.resena) sanitizado.resena = datos.resena.trim();
-  if (datos.desarrollador) sanitizado.desarrollador = datos.desarrollador.trim();
+  if (datos.desarrollador)
+    sanitizado.desarrollador = datos.desarrollador.trim();
   if (datos.tienda) sanitizado.tienda = datos.tienda.trim();
 
   // Campos numéricos
   if (datos.año) sanitizado.año = parseInt(datos.año);
-  if (datos.horasJugadas) sanitizado.horasJugadas = parseFloat(datos.horasJugadas);
+  if (datos.horasJugadas)
+    sanitizado.horasJugadas = parseFloat(datos.horasJugadas);
 
   // Campos booleanos
-  if (datos.completado !== undefined) sanitizado.completado = Boolean(datos.completado);
+  if (datos.completado !== undefined)
+    sanitizado.completado = Boolean(datos.completado);
 
   return sanitizado;
 };
@@ -175,8 +234,14 @@ const sanitizarResenia = (datos) => {
 
   if (datos.juegoId) sanitizado.juegoId = datos.juegoId;
   if (datos.contenido) sanitizado.contenido = datos.contenido.trim();
-  if (datos.calificacion) sanitizado.calificacion = parseInt(datos.calificacion);
+  if (datos.calificacion !== undefined && datos.calificacion !== null)
+    sanitizado.calificacion = parseInt(datos.calificacion);
   if (datos.autor) sanitizado.autor = datos.autor.trim();
+  if (datos.dificultad) sanitizado.dificultad = datos.dificultad;
+  if (datos.horasJugadas !== undefined && datos.horasJugadas !== null)
+    sanitizado.horasJugadas = Number(datos.horasJugadas);
+  if (datos.recomendaria !== undefined)
+    sanitizado.recomendaria = Boolean(datos.recomendaria);
 
   return sanitizado;
 };
@@ -204,7 +269,7 @@ const validarPaginacion = (req, res, next) => {
   req.paginacion = {
     pagina: paginaNum,
     limite: limiteNum,
-    skip: (paginaNum - 1) * limiteNum
+    skip: (paginaNum - 1) * limiteNum,
   };
 
   next();
@@ -216,5 +281,5 @@ module.exports = {
   validarResenia,
   validarPaginacion,
   sanitizarJuego,
-  sanitizarResenia
+  sanitizarResenia,
 };

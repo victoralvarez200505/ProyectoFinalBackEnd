@@ -1,10 +1,10 @@
 /**
  * 🔄 UTILIDADES DE TRANSFORMACIÓN
- * 
+ *
  * Este archivo maneja la transformación de datos entre el formato del frontend
  * y el formato del backend. Esto es necesario porque los esquemas pueden tener
  * nombres de campos diferentes entre ambas capas.
- * 
+ *
  * Transformaciones incluidas:
  * - Juegos: Frontend ↔ Backend
  * - Reseñas: Frontend ↔ Backend
@@ -18,8 +18,8 @@
  * @returns {Object} Objeto juego compatible con backend
  */
 const transformarABackend = (juegoFrontend) => {
-  if (!juegoFrontend || typeof juegoFrontend !== 'object') {
-    throw new Error('Datos de juego inválidos para transformar');
+  if (!juegoFrontend || typeof juegoFrontend !== "object") {
+    throw new Error("Datos de juego inválidos para transformar");
   }
 
   const juegoBackend = {
@@ -32,15 +32,21 @@ const transformarABackend = (juegoFrontend) => {
     plataforma: juegoFrontend.plataforma,
     tienda: juegoFrontend.tienda || "",
     desarrollador: juegoFrontend.desarrollador || "",
-    completado: juegoFrontend.completado !== undefined ? Boolean(juegoFrontend.completado) : false,
-    horasJugadas: juegoFrontend.horasJugadas !== undefined ? Number(juegoFrontend.horasJugadas) || 0 : 0,
+    completado:
+      juegoFrontend.completado !== undefined
+        ? Boolean(juegoFrontend.completado)
+        : false,
+    horasJugadas:
+      juegoFrontend.horasJugadas !== undefined
+        ? Number(juegoFrontend.horasJugadas) || 0
+        : 0,
   };
 
   // Limpiar campos undefined excepto los requeridos
   const resultado = {};
   Object.entries(juegoBackend).forEach(([clave, valor]) => {
     // Siempre incluir campos requeridos para validación
-    if (['nombre', 'genero', 'plataforma', 'año'].includes(clave)) {
+    if (["nombre", "genero", "plataforma", "año"].includes(clave)) {
       resultado[clave] = valor;
     } else if (valor !== undefined && valor !== null) {
       // Solo incluir campos opcionales si tienen valor
@@ -61,9 +67,12 @@ const transformarAFrontend = (juegoBackend) => {
 
   try {
     return {
-      id: juegoBackend._id ? juegoBackend._id.toString() : '',
-      nombre: juegoBackend.nombre || juegoBackend.titulo || '', // Compatibilidad con esquema anterior
-      año: juegoBackend.año || juegoBackend.añoLanzamiento || new Date().getFullYear(),
+      id: juegoBackend._id ? juegoBackend._id.toString() : "",
+      nombre: juegoBackend.nombre || juegoBackend.titulo || "", // Compatibilidad con esquema anterior
+      año:
+        juegoBackend.año ||
+        juegoBackend.añoLanzamiento ||
+        new Date().getFullYear(),
       imagen: juegoBackend.imagen || juegoBackend.imagenPortada || "",
       resena: juegoBackend.resena || juegoBackend.descripcion || "",
       genero: juegoBackend.genero || "",
@@ -72,15 +81,15 @@ const transformarAFrontend = (juegoBackend) => {
       desarrollador: juegoBackend.desarrollador || "",
       completado: Boolean(juegoBackend.completado),
       horasJugadas: Number(juegoBackend.horasJugadas) || 0,
-      fechaCreacion: juegoBackend.fechaCreacion 
+      fechaCreacion: juegoBackend.fechaCreacion
         ? new Date(juegoBackend.fechaCreacion).toISOString()
         : null,
       fechaActualizacion: juegoBackend.fechaActualizacion
         ? new Date(juegoBackend.fechaActualizacion).toISOString()
-        : null
+        : null,
     };
   } catch (error) {
-    console.error('Error transformando juego a frontend:', error);
+    console.error("Error transformando juego a frontend:", error);
     return null;
   }
 };
@@ -92,13 +101,13 @@ const transformarAFrontend = (juegoBackend) => {
  */
 const transformarArrayAFrontend = (juegosBackend) => {
   if (!Array.isArray(juegosBackend)) {
-    console.warn('Se esperaba un array para transformar juegos');
+    console.warn("Se esperaba un array para transformar juegos");
     return [];
   }
 
   return juegosBackend
     .map(transformarAFrontend)
-    .filter(juego => juego !== null);
+    .filter((juego) => juego !== null);
 };
 
 /**
@@ -107,26 +116,32 @@ const transformarArrayAFrontend = (juegosBackend) => {
  * @returns {Object} Objeto reseña compatible con backend
  */
 const transformarReseniaABackend = (reseniaFrontend = {}) => {
-  if (!reseniaFrontend || typeof reseniaFrontend !== 'object') {
-    throw new Error('Datos de reseña inválidos para transformar');
+  if (!reseniaFrontend || typeof reseniaFrontend !== "object") {
+    throw new Error("Datos de reseña inválidos para transformar");
   }
 
   const reseniaBackend = {
     juegoId: reseniaFrontend.juegoId,
-    contenido: reseniaFrontend.contenido || reseniaFrontend.texto || reseniaFrontend.textoResena,
+    contenido:
+      reseniaFrontend.contenido ||
+      reseniaFrontend.texto ||
+      reseniaFrontend.textoResena,
     calificacion: reseniaFrontend.calificacion || reseniaFrontend.puntuacion,
-    autor: reseniaFrontend.autor || 'Anónimo',
-    dificultad: reseniaFrontend.dificultad || 'Normal',
-    recomendaria: reseniaFrontend.recomendaria !== undefined 
-      ? Boolean(reseniaFrontend.recomendaria) 
-      : true,
-    horasJugadas: reseniaFrontend.horasJugadas ? Number(reseniaFrontend.horasJugadas) : 0
+    autor: reseniaFrontend.autor || "Anónimo",
+    dificultad: reseniaFrontend.dificultad || "Normal",
+    recomendaria:
+      reseniaFrontend.recomendaria !== undefined
+        ? Boolean(reseniaFrontend.recomendaria)
+        : true,
+    horasJugadas: reseniaFrontend.horasJugadas
+      ? Number(reseniaFrontend.horasJugadas)
+      : 0,
   };
 
   // Limpiar campos undefined
   const resultado = {};
   Object.entries(reseniaBackend).forEach(([clave, valor]) => {
-    if (valor !== undefined && valor !== null && valor !== '') {
+    if (valor !== undefined && valor !== null && valor !== "") {
       resultado[clave] = valor;
     }
   });
@@ -144,28 +159,38 @@ const transformarReseniaAFrontend = (reseniaBackend) => {
 
   try {
     const resultado = {
-      id: reseniaBackend._id ? reseniaBackend._id.toString() : '',
-      juegoId: '',
-      contenido: reseniaBackend.contenido || reseniaBackend.textoResena || '',
-      calificacion: Number(reseniaBackend.calificacion || reseniaBackend.puntuacion) || 1,
-      autor: reseniaBackend.autor || 'Anónimo',
-      dificultad: reseniaBackend.dificultad || 'Normal',
+      id: reseniaBackend._id ? reseniaBackend._id.toString() : "",
+      juegoId: "",
+      // Acepta variantes de nombre para compatibilidad
+      contenido:
+        reseniaBackend.contenido ||
+        reseniaBackend.comentario ||
+        reseniaBackend.textoResena ||
+        "",
+      calificacion:
+        Number(reseniaBackend.calificacion || reseniaBackend.puntuacion) || 1,
+      autor: reseniaBackend.autor || reseniaBackend.nombreUsuario || "Anónimo",
+      dificultad: reseniaBackend.dificultad || "Normal",
       recomendaria: Boolean(reseniaBackend.recomendaria),
       horasJugadas: Number(reseniaBackend.horasJugadas) || 0,
-      fechaCreacion: reseniaBackend.fechaCreacion 
+      fechaCreacion: reseniaBackend.fechaCreacion
         ? new Date(reseniaBackend.fechaCreacion).toISOString()
         : null,
       fechaActualizacion: reseniaBackend.fechaActualizacion
         ? new Date(reseniaBackend.fechaActualizacion).toISOString()
-        : null
+        : null,
     };
 
     // Manejar juegoId que puede ser ObjectId o string o objeto poblado
     if (reseniaBackend.juegoId) {
-      if (typeof reseniaBackend.juegoId === 'object' && reseniaBackend.juegoId._id) {
+      if (
+        typeof reseniaBackend.juegoId === "object" &&
+        reseniaBackend.juegoId._id
+      ) {
         // Objeto poblado con datos del juego
         resultado.juegoId = reseniaBackend.juegoId._id.toString();
-        resultado.juegoNombre = reseniaBackend.juegoId.nombre || reseniaBackend.juegoId.titulo;
+        resultado.juegoNombre =
+          reseniaBackend.juegoId.nombre || reseniaBackend.juegoId.titulo;
         resultado.juegoGenero = reseniaBackend.juegoId.genero;
       } else {
         // ObjectId simple
@@ -175,7 +200,7 @@ const transformarReseniaAFrontend = (reseniaBackend) => {
 
     return resultado;
   } catch (error) {
-    console.error('Error transformando reseña a frontend:', error);
+    console.error("Error transformando reseña a frontend:", error);
     return null;
   }
 };
@@ -187,13 +212,13 @@ const transformarReseniaAFrontend = (reseniaBackend) => {
  */
 const transformarArrayReseniasAFrontend = (reseniasBackend) => {
   if (!Array.isArray(reseniasBackend)) {
-    console.warn('Se esperaba un array para transformar reseñas');
+    console.warn("Se esperaba un array para transformar reseñas");
     return [];
   }
 
   return reseniasBackend
     .map(transformarReseniaAFrontend)
-    .filter(resenia => resenia !== null);
+    .filter((resenia) => resenia !== null);
 };
 
 /**
@@ -202,12 +227,14 @@ const transformarArrayReseniasAFrontend = (reseniasBackend) => {
  * @returns {boolean} True si es válido
  */
 const validarEstructuraJuego = (juego) => {
-  return juego && 
-         typeof juego === 'object' &&
-         typeof juego.nombre === 'string' &&
-         typeof juego.genero === 'string' &&
-         typeof juego.plataforma === 'string' &&
-         typeof juego.año === 'number';
+  return (
+    juego &&
+    typeof juego === "object" &&
+    typeof juego.nombre === "string" &&
+    typeof juego.genero === "string" &&
+    typeof juego.plataforma === "string" &&
+    typeof juego.año === "number"
+  );
 };
 
 /**
@@ -216,12 +243,14 @@ const validarEstructuraJuego = (juego) => {
  * @returns {boolean} True si es válido
  */
 const validarEstructuraResenia = (resenia) => {
-  return resenia && 
-         typeof resenia === 'object' &&
-         typeof resenia.contenido === 'string' &&
-         typeof resenia.calificacion === 'number' &&
-         resenia.calificacion >= 1 &&
-         resenia.calificacion <= 5;
+  return (
+    resenia &&
+    typeof resenia === "object" &&
+    typeof resenia.contenido === "string" &&
+    typeof resenia.calificacion === "number" &&
+    resenia.calificacion >= 1 &&
+    resenia.calificacion <= 5
+  );
 };
 
 /**
@@ -230,8 +259,8 @@ const validarEstructuraResenia = (resenia) => {
  * @returns {string} Texto limpio
  */
 const limpiarTexto = (texto) => {
-  if (typeof texto !== 'string') return '';
-  return texto.trim().replace(/\s+/g, ' '); // Eliminar espacios extra
+  if (typeof texto !== "string") return "";
+  return texto.trim().replace(/\s+/g, " "); // Eliminar espacios extra
 };
 
 /**
@@ -245,7 +274,7 @@ const transformarEstadisticas = (datos) => {
   return {
     total: datos.length,
     ultimaActualizacion: new Date().toISOString(),
-    procesados: datos.length
+    procesados: datos.length,
   };
 };
 
@@ -257,10 +286,10 @@ module.exports = {
   transformarReseniaABackend,
   transformarReseniaAFrontend,
   transformarArrayReseniasAFrontend,
-  
+
   // Utilidades de validación
   validarEstructuraJuego,
   validarEstructuraResenia,
   limpiarTexto,
-  transformarEstadisticas
+  transformarEstadisticas,
 };

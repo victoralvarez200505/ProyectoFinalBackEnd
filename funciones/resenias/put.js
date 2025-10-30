@@ -1,4 +1,4 @@
-const Resenia = require("../../models/resenia");
+const Resenia = require("../../src/models/resenia");
 const { validarObjectId } = require("../../utils/validation");
 
 /**
@@ -25,22 +25,22 @@ const actualizarResenia = async (req, res, next) => {
 
     // Construir objeto de actualización solo con campos proporcionados
     const actualizacion = {};
-    
+
     if (comentario !== undefined) {
       actualizacion.comentario = comentario;
     }
-    
+
     if (puntuacion !== undefined) {
       // Validar puntuación si se proporciona
       if (puntuacion < 1 || puntuacion > 5) {
         return res.status(400).json({
           error: "Puntuación inválida",
-          detalles: ["La puntuación debe estar entre 1 y 5"]
+          detalles: ["La puntuación debe estar entre 1 y 5"],
         });
       }
       actualizacion.puntuacion = puntuacion;
     }
-    
+
     if (nombreUsuario !== undefined) {
       actualizacion.nombreUsuario = nombreUsuario;
     }
@@ -53,7 +53,7 @@ const actualizarResenia = async (req, res, next) => {
       id,
       actualizacion,
       { new: true, runValidators: true }
-    ).populate('juegoId', 'titulo');
+    ).populate("juegoId", "titulo");
 
     if (!reseniaActualizada) {
       return res.status(404).json({ error: "Reseña no encontrada" });

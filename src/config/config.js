@@ -37,6 +37,7 @@ const configuracion = {
     origin: process.env.CORS_ORIGIN || "http://localhost:5173", // Puerto por defecto de Vite
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    // 'X-App-Version' permite a los clientes indicar la versión de la aplicación que están usando (útil para control de versiones y depuración)
     allowedHeaders: ["Content-Type", "Authorization", "X-App-Version"],
   },
 

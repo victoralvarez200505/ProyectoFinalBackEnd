@@ -1,4 +1,4 @@
-const Juego = require("../../models/juego");
+const Juego = require("../../src/models/juego");
 const {
   transformarABackend,
   transformarAFrontend,

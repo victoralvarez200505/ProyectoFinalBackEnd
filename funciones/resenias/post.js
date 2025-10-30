@@ -1,5 +1,5 @@
-const Resenia = require("../../models/resenia");
-const Juego = require("../../models/juego");
+const Resenia = require("../../src/models/resenia");
+const Juego = require("../../src/models/juego");
 const { validarObjectId } = require("../../utils/validation");
 
 /**
@@ -27,7 +27,7 @@ const crearResenia = async (req, res, next) => {
     if (!comentario || !puntuacion || !nombreUsuario) {
       return res.status(400).json({
         error: "Faltan datos requeridos",
-        detalles: ["comentario", "puntuacion", "nombreUsuario son requeridos"]
+        detalles: ["comentario", "puntuacion", "nombreUsuario son requeridos"],
       });
     }
 
@@ -35,7 +35,7 @@ const crearResenia = async (req, res, next) => {
     if (puntuacion < 1 || puntuacion > 5) {
       return res.status(400).json({
         error: "Puntuación inválida",
-        detalles: ["La puntuación debe estar entre 1 y 5"]
+        detalles: ["La puntuación debe estar entre 1 y 5"],
       });
     }
 
@@ -50,9 +50,9 @@ const crearResenia = async (req, res, next) => {
 
     // Guardar en la base de datos
     const reseniaGuardada = await nuevaResenia.save();
-    
+
     // Poblar la referencia al juego antes de devolver
-    await reseniaGuardada.populate('juegoId', 'titulo');
+    await reseniaGuardada.populate("juegoId", "titulo");
 
     res.status(201).json(reseniaGuardada);
   } catch (error) {
