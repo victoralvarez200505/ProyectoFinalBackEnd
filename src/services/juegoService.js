@@ -1,9 +1,9 @@
 /**
  * 🎮 SERVICIO DE JUEGOS
- * 
+ *
  * Este servicio encapsula toda la lógica de negocio relacionada con juegos.
  * Proporciona una capa de abstracción entre los controladores y los modelos.
- * 
+ *
  * Funcionalidades:
  * - Operaciones CRUD optimizadas
  * - Búsquedas avanzadas
@@ -13,7 +13,10 @@
  */
 
 const Juego = require("../models/juego");
-const { transformarAFrontend, transformarArrayAFrontend } = require("../utils/transformer");
+const {
+  transformarAFrontend,
+  transformarArrayAFrontend,
+} = require("../utils/transformer");
 
 class JuegoService {
   /**
@@ -32,8 +35,8 @@ class JuegoService {
         añoHasta,
         limite = 100,
         pagina = 1,
-        ordenarPor = 'fechaCreacion',
-        orden = 'desc'
+        ordenarPor = "fechaCreacion",
+        orden = "desc",
       } = filtros;
 
       // Construir query de MongoDB
@@ -42,7 +45,7 @@ class JuegoService {
       // Filtros básicos
       if (genero) query.genero = new RegExp(genero, "i");
       if (plataforma) query.plataforma = new RegExp(plataforma, "i");
-      if (completado !== undefined) query.completado = completado === 'true';
+      if (completado !== undefined) query.completado = completado === "true";
 
       // Filtro de años
       if (añoDesde || añoHasta) {
@@ -57,7 +60,7 @@ class JuegoService {
           { nombre: new RegExp(buscar, "i") },
           { desarrollador: new RegExp(buscar, "i") },
           { tienda: new RegExp(buscar, "i") },
-          { resena: new RegExp(buscar, "i") }
+          { sinopsis: new RegExp(buscar, "i") },
         ];
       }
 
@@ -66,7 +69,7 @@ class JuegoService {
 
       // Ejecutar consulta
       const juegos = await Juego.find(query)
-        .sort({ [ordenarPor]: orden === 'asc' ? 1 : -1 })
+        .sort({ [ordenarPor]: orden === "asc" ? 1 : -1 })
         .limit(parseInt(limite))
         .skip(skip);
 
@@ -79,10 +82,9 @@ class JuegoService {
           paginaActual: parseInt(pagina),
           totalPaginas: Math.ceil(total / parseInt(limite)),
           totalJuegos: total,
-          juegosPorPagina: parseInt(limite)
-        }
+          juegosPorPagina: parseInt(limite),
+        },
       };
-
     } catch (error) {
       throw new Error(`Error obteniendo juegos: ${error.message}`);
     }
@@ -97,7 +99,7 @@ class JuegoService {
     try {
       const juego = await Juego.findById(id);
       if (!juego) {
-        throw new Error('Juego no encontrado');
+        throw new Error("Juego no encontrado");
       }
       return transformarAFrontend(juego);
     } catch (error) {
@@ -113,23 +115,22 @@ class JuegoService {
   async crear(datosJuego) {
     try {
       // Verificar duplicados por nombre
-      const existente = await Juego.findOne({ 
-        nombre: new RegExp(`^${datosJuego.nombre}$`, 'i') 
+      const existente = await Juego.findOne({
+        nombre: new RegExp(`^${datosJuego.nombre}$`, "i"),
       });
 
       if (existente) {
-        throw new Error('Ya existe un juego con ese nombre');
+        throw new Error("Ya existe un juego con ese nombre");
       }
 
       // Crear juego
       const nuevoJuego = new Juego({
         ...datosJuego,
-        fechaCreacion: new Date()
+        fechaCreacion: new Date(),
       });
 
       const juegoGuardado = await nuevoJuego.save();
       return transformarAFrontend(juegoGuardado);
-
     } catch (error) {
       throw new Error(`Error creando juego: ${error.message}`);
     }
@@ -146,18 +147,21 @@ class JuegoService {
       // Verificar que existe
       const juegoExistente = await Juego.findById(id);
       if (!juegoExistente) {
-        throw new Error('Juego no encontrado');
+        throw new Error("Juego no encontrado");
       }
 
       // Verificar duplicados si se cambia el nombre
-      if (datosActualizacion.nombre && datosActualizacion.nombre !== juegoExistente.nombre) {
+      if (
+        datosActualizacion.nombre &&
+        datosActualizacion.nombre !== juegoExistente.nombre
+      ) {
         const duplicado = await Juego.findOne({
-          nombre: new RegExp(`^${datosActualizacion.nombre}$`, 'i'),
-          _id: { $ne: id }
+          nombre: new RegExp(`^${datosActualizacion.nombre}$`, "i"),
+          _id: { $ne: id },
         });
 
         if (duplicado) {
-          throw new Error('Ya existe otro juego con ese nombre');
+          throw new Error("Ya existe otro juego con ese nombre");
         }
       }
 
@@ -169,7 +173,6 @@ class JuegoService {
       );
 
       return transformarAFrontend(juegoActualizado);
-
     } catch (error) {
       throw new Error(`Error actualizando juego: ${error.message}`);
     }
@@ -183,17 +186,16 @@ class JuegoService {
   async eliminar(id) {
     try {
       const juegoEliminado = await Juego.findByIdAndDelete(id);
-      
+
       if (!juegoEliminado) {
-        throw new Error('Juego no encontrado');
+        throw new Error("Juego no encontrado");
       }
 
       return {
         id: juegoEliminado._id,
         nombre: juegoEliminado.nombre,
-        mensaje: 'Juego eliminado exitosamente'
+        mensaje: "Juego eliminado exitosamente",
       };
-
     } catch (error) {
       throw new Error(`Error eliminando juego: ${error.message}`);
     }
@@ -215,9 +217,9 @@ class JuegoService {
             horasTotales: { $sum: "$horasJugadas" },
             añoMasAntiguo: { $min: "$año" },
             añoMasReciente: { $max: "$año" },
-            promedioHoras: { $avg: "$horasJugadas" }
-          }
-        }
+            promedioHoras: { $avg: "$horasJugadas" },
+          },
+        },
       ]);
 
       // Estadísticas por género
@@ -228,10 +230,10 @@ class JuegoService {
             cantidad: { $sum: 1 },
             completados: { $sum: { $cond: ["$completado", 1, 0] } },
             horasTotales: { $sum: "$horasJugadas" },
-            promedioHoras: { $avg: "$horasJugadas" }
-          }
+            promedioHoras: { $avg: "$horasJugadas" },
+          },
         },
-        { $sort: { cantidad: -1 } }
+        { $sort: { cantidad: -1 } },
       ]);
 
       // Estadísticas por plataforma
@@ -240,26 +242,25 @@ class JuegoService {
           $group: {
             _id: "$plataforma",
             cantidad: { $sum: 1 },
-            completados: { $sum: { $cond: ["$completado", 1, 0] } }
-          }
+            completados: { $sum: { $cond: ["$completado", 1, 0] } },
+          },
         },
-        { $sort: { cantidad: -1 } }
+        { $sort: { cantidad: -1 } },
       ]);
 
       // Top 10 juegos más jugados
       const juegosMasJugados = await Juego.find({ horasJugadas: { $gt: 0 } })
         .sort({ horasJugadas: -1 })
         .limit(10)
-        .select('nombre horasJugadas genero completado');
+        .select("nombre horasJugadas genero completado");
 
       return {
         general: estadisticasGenerales[0] || {},
         porGenero: estadisticasPorGenero,
         porPlataforma: estadisticasPorPlataforma,
         juegosMasJugados: transformarArrayAFrontend(juegosMasJugados),
-        fechaGeneracion: new Date().toISOString()
+        fechaGeneracion: new Date().toISOString(),
       };
-
     } catch (error) {
       throw new Error(`Error obteniendo estadísticas: ${error.message}`);
     }
@@ -282,8 +283,8 @@ class JuegoService {
           { tienda: new RegExp(termino, "i") },
           { resena: new RegExp(termino, "i") },
           { genero: new RegExp(termino, "i") },
-          { plataforma: new RegExp(termino, "i") }
-        ]
+          { plataforma: new RegExp(termino, "i") },
+        ],
       };
 
       if (!incluirCompletados) {
@@ -295,7 +296,6 @@ class JuegoService {
         .sort({ nombre: 1 });
 
       return transformarArrayAFrontend(resultados);
-
     } catch (error) {
       throw new Error(`Error en búsqueda avanzada: ${error.message}`);
     }
@@ -308,8 +308,8 @@ class JuegoService {
    */
   async obtenerPorGenero(genero) {
     try {
-      const juegos = await Juego.find({ 
-        genero: new RegExp(genero, "i") 
+      const juegos = await Juego.find({
+        genero: new RegExp(genero, "i"),
       }).sort({ nombre: 1 });
 
       return transformarArrayAFrontend(juegos);
@@ -324,8 +324,9 @@ class JuegoService {
    */
   async obtenerCompletados() {
     try {
-      const juegos = await Juego.find({ completado: true })
-        .sort({ fechaCreacion: -1 });
+      const juegos = await Juego.find({ completado: true }).sort({
+        fechaCreacion: -1,
+      });
 
       return transformarArrayAFrontend(juegos);
     } catch (error) {
@@ -339,8 +340,9 @@ class JuegoService {
    */
   async obtenerPendientes() {
     try {
-      const juegos = await Juego.find({ completado: false })
-        .sort({ fechaCreacion: -1 });
+      const juegos = await Juego.find({ completado: false }).sort({
+        fechaCreacion: -1,
+      });
 
       return transformarArrayAFrontend(juegos);
     } catch (error) {

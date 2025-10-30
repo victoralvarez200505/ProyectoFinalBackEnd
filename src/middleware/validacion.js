@@ -42,7 +42,7 @@ const validarId = (req, res, next) => {
  * @param {Function} next - Función next de Express
  */
 const validarJuego = (req, res, next) => {
-  const { nombre, año, genero, plataforma, imagen, resena } = req.body;
+  const { nombre, año, genero, plataforma, imagen, sinopsis } = req.body;
   const errores = [];
 
   // Campos requeridos
@@ -80,8 +80,8 @@ const validarJuego = (req, res, next) => {
     errores.push("Imagen debe ser una URL válida");
   }
 
-  if (resena && typeof resena !== "string") {
-    errores.push("Reseña debe ser texto válido");
+  if (sinopsis && typeof sinopsis !== "string") {
+    errores.push("Sinopsis debe ser texto válido");
   }
 
   // Validaciones adicionales
@@ -89,8 +89,8 @@ const validarJuego = (req, res, next) => {
     errores.push("Nombre no puede exceder 100 caracteres");
   }
 
-  if (resena && resena.length > 1000) {
-    errores.push("Reseña no puede exceder 1000 caracteres");
+  if (sinopsis && sinopsis.length > 1000) {
+    errores.push("Sinopsis no puede exceder 1000 caracteres");
   }
 
   // Si hay errores, retornar error de validación
@@ -207,7 +207,7 @@ const sanitizarJuego = (datos) => {
   if (datos.genero) sanitizado.genero = datos.genero.trim();
   if (datos.plataforma) sanitizado.plataforma = datos.plataforma.trim();
   if (datos.imagen) sanitizado.imagen = datos.imagen.trim();
-  if (datos.resena) sanitizado.resena = datos.resena.trim();
+  if (datos.sinopsis) sanitizado.sinopsis = datos.sinopsis.trim();
   if (datos.desarrollador)
     sanitizado.desarrollador = datos.desarrollador.trim();
   if (datos.tienda) sanitizado.tienda = datos.tienda.trim();

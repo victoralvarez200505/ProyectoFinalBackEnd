@@ -27,7 +27,7 @@ const transformarABackend = (juegoFrontend) => {
     nombre: juegoFrontend.nombre,
     año: juegoFrontend.año,
     imagen: juegoFrontend.imagen || "",
-    resena: juegoFrontend.resena || "",
+    sinopsis: juegoFrontend.sinopsis || "",
     genero: juegoFrontend.genero,
     plataforma: juegoFrontend.plataforma,
     tienda: juegoFrontend.tienda || "",
@@ -74,7 +74,7 @@ const transformarAFrontend = (juegoBackend) => {
         juegoBackend.añoLanzamiento ||
         new Date().getFullYear(),
       imagen: juegoBackend.imagen || juegoBackend.imagenPortada || "",
-      resena: juegoBackend.resena || juegoBackend.descripcion || "",
+      sinopsis: juegoBackend.sinopsis || juegoBackend.descripcion || "",
       genero: juegoBackend.genero || "",
       plataforma: juegoBackend.plataforma || "",
       tienda: juegoBackend.tienda || "",
